@@ -17,3 +17,9 @@ hello
 some changes
 Some chanfes on a new branch
 >>>>>>> hotfix_2
+
+   <<<<<<< HEAD
+   В курсе производилась работа с ветками git.
+   
+some changes 
+  
