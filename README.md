@@ -10,5 +10,10 @@
 5. Non Blocking Algorithm
 6. Пулы
 7. NIO и многопоточность
+<<<<<<< HEAD
 В курсе производилась работа с ветками git.
 hello 
+=======
+some changes
+Some chanfes on a new branch
+>>>>>>> hotfix_2
