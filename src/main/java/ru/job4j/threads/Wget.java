@@ -2,57 +2,57 @@ package ru.job4j.threads;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
 
 public class Wget implements Runnable {
     private final String url;
     private final int speed;
 
-    public Wget(String url, int speed) {
+    private final String dir;
+
+    public Wget(String url, int speed, String dir) {
         this.url = url;
         this.speed = speed;
+        this.dir = dir;
     }
 
     @Override
     public void run() {
         var startAt = System.currentTimeMillis();
-        var file = new File("tmp.xml");
+        var file = new File(dir);
         try (var input = new URL(url).openStream();
              var output = new FileOutputStream(file)) {
             System.out.println("Open connection: " + (System.currentTimeMillis() - startAt) + " ms");
             var dataBuffer = new byte[512];
             int bytesRead;
+            int sum = 0;
+            var time = System.currentTimeMillis();
             while ((bytesRead = input.read(dataBuffer, 0, dataBuffer.length)) != -1) {
-                var downloadAt = System.nanoTime();
-                output.write(dataBuffer, 0, bytesRead);
-                var nanoSeconds = System.nanoTime() - downloadAt;
-                System.out.println("Read 512 bytes : " + nanoSeconds + " nano.");
-                double bytesInSecond = (512d / nanoSeconds) * 1000000000;
-                if (speed < 6000) {
-                    int seconds = (int) (bytesInSecond / speed);
-                    try {
-                        Thread.sleep(seconds);
-                    } catch (Exception e) {
-                        Thread.currentThread().interrupt();
-                    }
+                sum += bytesRead;
+                if (sum >= speed && ((System.currentTimeMillis() - time) / 1000) > 1) {
+                    Thread.sleep(System.currentTimeMillis() - time);
+                    sum = 0;
                 }
+                output.write(dataBuffer, 0, bytesRead);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        }
-        try {
-            System.out.println(Files.size(file.toPath()) + " bytes");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
     }
 
     public static void main(String[] args) throws InterruptedException {
-        String url = args[0];
-        int speed = Integer.parseInt(args[1]);
-        Thread wget = new Thread(new Wget(url, speed));
+        String url;
+        int speed;
+        String dir;
+        if (args.length > 2 && !args[0].isEmpty()
+                && !args[1].isEmpty() && !args[2].isEmpty()) {
+            url = args[0];
+            speed = Integer.parseInt(args[1]);
+            dir = args[2];
+        } else {
+            throw new IllegalArgumentException();
+        }
+        Thread wget = new Thread(new Wget(url, speed, dir));
         wget.start();
         wget.join();
     }
