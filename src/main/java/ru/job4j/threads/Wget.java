@@ -32,10 +32,10 @@ public class Wget implements Runnable {
                 if (sum >= speed) {
                     long interval = System.currentTimeMillis() - time;
                     if (interval < 1000) {
-                        Thread.sleep(sum / speed);
-                        sum = 0;
-                        time = System.currentTimeMillis();
+                        Thread.sleep(1000 - interval);
                     }
+                    sum = 0;
+                    time = System.currentTimeMillis();
                 }
                 output.write(dataBuffer, 0, bytesRead);
             }
